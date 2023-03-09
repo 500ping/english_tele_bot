@@ -16,7 +16,7 @@ except:
 
 
 data = {}
-with open("dictionary.json") as file:
+with open("3000_words.json") as file:
     data = json.load(file)
 
 dictionaries = []
@@ -24,7 +24,8 @@ for k, v in data.items():
     dictionaries.append(
         Dictionary(
             word=k,
-            detail=v,
+            detail=v[1],
+            pronounce=v[0],
         )
     )
 session.bulk_save_objects(dictionaries)

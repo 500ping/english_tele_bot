@@ -1,25 +1,42 @@
-import pytz
-import datetime
+from bs4 import BeautifulSoup
 from telegram import Update
 from telegram.ext import ContextTypes
 
+from .config import RUN_TIMES
+from .database import create_session
+from .models import Dictionary
 
-async def send_message(context: ContextTypes.DEFAULT_TYPE):
+
+async def get_five_eng_words(context: ContextTypes.DEFAULT_TYPE):
     job = context.job
-    await context.bot.send_message(
-        chat_id=job.chat_id, text="Hello, it's time for your scheduled message!")
+
+    message = ""
+    session = create_session()
+    words = Dictionary.get_random_words(session)
+    for word in words:
+        message += f"-- {word.word.capitalize()} ({word.pronounce})\n{word.detail}\n"
+
+    await context.bot.send_message(chat_id=job.chat_id, text=message)
 
 
-async def run_cron(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    print(context)
+async def study(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
-    context.job_queue.run_daily(
-        send_message,
-        time=datetime.time(hour=11, minute=22,
-                           tzinfo=pytz.timezone("Asia/Bangkok")),
+    # for run_time in RUN_TIMES:
+    #     context.job_queue.run_daily(
+    #         get_five_eng_words,
+    #         time=run_time,
+    #         chat_id=chat_id,
+    #         name=str(chat_id),
+    #     )
+
+    context.job_queue.run_repeating(
+        get_five_eng_words,
+        10,
         chat_id=chat_id,
         name=str(chat_id),
+        data=10
     )
+
     await context.bot.send_message(
         chat_id=chat_id, text="Scheduled messages are set!")
 
