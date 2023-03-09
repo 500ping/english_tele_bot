@@ -7,6 +7,13 @@ from app.models import Dictionary
 Session = sessionmaker(bind=engine)
 session = Session()
 
+# Delete all old record
+try:
+    session.query(Dictionary).delete()
+    session.commit()
+except:
+    session.rollback()
+
 
 data = {}
 with open("dictionary.json") as file:
