@@ -9,5 +9,4 @@ engine = create_engine(
 
 def create_session():
     Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
+    return Session()
